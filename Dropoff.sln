@@ -1,0 +1,36 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Server\Server.csproj", "{A19F21D0-B2B7-450F-8D4D-6874512961CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{1FC8E1D6-3439-45DD-A76F-011B308AA0A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dropoff", "Dropoff\Dropoff.csproj", "{789B1C1B-3882-4581-BEB8-D42414174E4D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A19F21D0-B2B7-450F-8D4D-6874512961CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A19F21D0-B2B7-450F-8D4D-6874512961CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A19F21D0-B2B7-450F-8D4D-6874512961CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A19F21D0-B2B7-450F-8D4D-6874512961CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FC8E1D6-3439-45DD-A76F-011B308AA0A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FC8E1D6-3439-45DD-A76F-011B308AA0A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FC8E1D6-3439-45DD-A76F-011B308AA0A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FC8E1D6-3439-45DD-A76F-011B308AA0A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{789B1C1B-3882-4581-BEB8-D42414174E4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{789B1C1B-3882-4581-BEB8-D42414174E4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{789B1C1B-3882-4581-BEB8-D42414174E4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{789B1C1B-3882-4581-BEB8-D42414174E4D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.DotNetNamingPolicy = $1
+		$1.DirectoryNamespaceAssociation = PrefixedHierarchical
+		$0.StandardHeader = $2
+		$0.VersionControlPolicy = $3
+	EndGlobalSection
+EndGlobal
