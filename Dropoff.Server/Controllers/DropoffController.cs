@@ -21,22 +21,6 @@ namespace Dropoff.Server.Controllers
             Storage = configuration["DROPOFF_STORE"];
         }
 
-        // GET /
-        // Output all of the files in storage.
-        //[HttpGet]
-        //public IActionResult Get()
-        //{
-        //    var files = Directory.EnumerateFiles(Storage)
-        //         .Select(file => new FileInfo(file))
-        //         .Select(file => string.Join('\t', new string[]
-        //            {
-        //                file.Name,
-        //                file.Length > 1000 ? (file.Length / 1000) + " KB" : file.Length + " B",
-        //                file.LastWriteTime.ToLongDateString()
-        //            }));
-        //    return Ok(FilesHeader + string.Join('\n', files));
-        //}
-
         // POST /
         // Dropoff a new file and return the file name.
         [HttpPost("{key?}")]
@@ -124,9 +108,15 @@ namespace Dropoff.Server.Controllers
             // Verify the id exists and is the proper length
             if (string.IsNullOrEmpty(id) || id.Length != 32)
             {
-                return NotFound("File does not exist.");
+                return NotFound("Key entry does not exist.");
             }
             string file = Path.Combine(Storage, id);
+            FileInfo fileInfo = new FileInfo(file);
+            // Make sure to not return files that have extensions in the key
+            if (!fileInfo.Exists && !string.IsNullOrEmpty(fileInfo.Extension))
+            {
+                return NotFound("Key entry does not exist.");
+            }
             string fileIV = file + ".iv";
             string type = GetContentType(t);
             try
@@ -167,36 +157,11 @@ namespace Dropoff.Server.Controllers
                 }
 
             } catch (FileNotFoundException) {
-                return NotFound("File does not exist.");
+                return NotFound("Key entry does not exist.");
             } catch (Exception) {
                 return BadRequest("An error occured.");
             }
         }
-
-        //// DELETE /5
-        //// Remove the file from the storage.
-        //[HttpDelete("{id}")]
-        //public IActionResult Delete(string id)
-        //{
-        //    if (string.IsNullOrEmpty(id))
-        //    {
-        //        return NotFound("File does not exist");
-        //    }
-        //    string file = Path.Combine(Storage, id);
-        //    try
-        //    {
-        //        new FileInfo(file).Delete();
-        //        return Ok($"Success: {id} was deleted.");
-        //    }
-        //    catch (IOException)
-        //    {
-        //        return BadRequest("An error occured.");
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return BadRequest("An error occured.");
-        //    }
-        //}
 
         // Provide some shorthands for Content-Type's
         private string GetContentType(string type) {

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
@@ -87,6 +88,20 @@ namespace Dropoff.Test
 
             // Assert the files can be Fetched
             await GetFilesCheck(postFiles);
+        }
+
+        [Fact]
+        public async Task InvalidKeyEntryTest()
+        {
+            // Act and Assert
+            var response = await _client.GetAsync("/1111111111111111111111111111.txt");
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            response = await _client.GetAsync("/1111111111111111111111111111111.");
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            response = await _client.GetAsync("/11111111111/../11111111111111111");
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            response = await _client.GetAsync("/../../../../../../../../../../11");
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
     }
 }
