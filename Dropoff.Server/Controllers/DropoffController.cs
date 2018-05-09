@@ -13,7 +13,6 @@ namespace Dropoff.Server.Controllers
     [Route("/")]
     public class DropoffController : Controller
     {
-        private readonly string FilesHeader = "Dropoff\n" + "File".PadRight(36,' ') + "Size\tDate\n";
         private readonly string Storage;
 
         public DropoffController(IConfiguration configuration)
@@ -100,6 +99,11 @@ namespace Dropoff.Server.Controllers
             return Ok(id);
         }
 
+        // GET /
+        // Redirect to 00000000000000000000000000000000 file (Readme).
+        [HttpGet("/")]
+        public IActionResult Get() => Get(Guid.Empty.ToString().Split('-').Aggregate("", (t, n) => t + n), null, "html");
+
         // GET /5
         // Fetch the file and return the contents.
         [HttpGet("{id}/{key?}")]
@@ -166,6 +170,7 @@ namespace Dropoff.Server.Controllers
         // Provide some shorthands for Content-Type's
         private string GetContentType(string type) {
             switch (type) {
+                case "html": return "text/html";
                 case "json": return "application/json";
                 case "raw": return "text/plain";
                 default: return "text/plain";
