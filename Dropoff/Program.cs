@@ -26,6 +26,10 @@ namespace Dropoff
                 {
                     response = await client.Dropoff(new FileStream(dropoffParams.FilePath, FileMode.Open));
                 }
+                else if (!string.IsNullOrEmpty(dropoffParams.Input))
+                {
+                    response = await client.Dropoff(dropoffParams.Input, dropoffParams.Key);
+                }
             }
             else
             {
