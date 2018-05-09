@@ -1,0 +1,13 @@
+<!doctype html>
+<html>
+<head>
+<title>Dropoff</title>
+</head>
+<body>
+<h1>Dropoff</h1>
+<form action="" method="post">
+	<textarea id="i" name="payload"></textarea>
+	<button type="submit">Dropoff</button>
+</form>
+</body>
+</html>
