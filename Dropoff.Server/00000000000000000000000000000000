@@ -1,13 +1,107 @@
 <!doctype html>
-<html>
-<head>
-<title>Dropoff</title>
-</head>
-<body>
-<h1>Dropoff</h1>
-<form action="" method="post">
-	<textarea id="i" name="payload"></textarea>
-	<button type="submit">Dropoff</button>
-</form>
-</body>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Dropoff</title>
+    <style>
+      body {
+      font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+      width: 100%;
+      padding-right: 15px;
+      margin-right: auto;
+      margin-left: auto;
+      }
+      #about {
+      padding-left: 15px;
+      padding-right: 15px;
+      margin-right: auto;
+      margin-left: auto;
+      }
+      a:link, a:visited {
+      color: slategray;
+      text-decoration-style: none;
+      text-decoration-color: slategray;
+      text-decoration-line: none;
+      }
+      a:hover {
+      color: black;
+      }
+      form {
+      text-align: center;
+      }
+      textarea {
+      width: 80%;
+      resize: vertical;
+      overflow: auto;
+      }
+      button {
+      padding-top: 8px;
+      padding-bottom: 8px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      }
+      footer {
+      color: slategray;
+      text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <form action="" method="post">
+      <textarea rows="5" name="payload"></textarea>
+      <div>
+        <button type="submit">Dropoff</button>
+      </div>
+    </form>
+    <div id="about" hidden="">
+      <h1>Dropoff</h1>
+      <p>
+        Dropoff is a simple text-dropoff application. Provide some text in the above textarea and click <em>Dropoff</em>. The text will be stored and a 32 character key will be provided as a lookup.
+      </p>
+      <h3>Fetch</h3>
+      <p>To fetch the text "Dropped off", simply put the 32 character key in the url behind the url.</p>
+      <p>
+        e.x. <a href="https://dropoff.azurewebsites.net/00000000000000000000000000000000">
+          <code>https://dropoff.azurewebsites.net/00000000000000000000000000000000</code>
+        </a>
+      </p>
+      <h4>Content Types</h4>
+      <p>
+        To fetch a file as a different content type: <a href="https://dropoff.azurewebsites.net/00000000000000000000000000000000?t=html">
+          <code>
+            https://dropoff.azurewebsites.net/00000000000000000000000000000000?<strong>t=html</strong>
+          </code>
+        </a>
+      </p>
+      <p>Available content types:</p>
+      <ul>
+        <li>
+          <strong>raw</strong> : "text/plain"
+        </li>
+        <li>
+          <strong>html</strong> : "text/html"
+        </li>
+        <li>
+          <strong>json</strong> : "application/json"
+        </li>
+      </ul>
+      <h3>Notices</h3>
+      <ul>
+        <li>There is a 4MB limit for files provided.</li>
+        <li>This is just a simple web application, to learn some new back-end technologies.</li>
+        <li>The files/text/information you provide, you provide at will. I reserve the right to modify and delete any files/text/information you may provide.</li>
+      </ul>
+    </div>
+    <footer>
+      <p>
+        <a href="#about" id="a">About</a> | Another random experiment made by <a href="https://devincarr.com">this guy</a>.
+      </p>
+    </footer>
+    <script>
+      (() => {
+      document.getElementById("a").onclick = (e) => { document.getElementById("about").removeAttribute("hidden") }
+      })()
+    </script>
+  </body>
 </html>
