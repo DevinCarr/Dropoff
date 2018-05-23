@@ -4,8 +4,10 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -30,8 +32,6 @@ namespace Dropoff.Test
                             .UseStartup<Server.Startup>()
                             .UseConfiguration(_config.Build()));
             _client = _server.CreateClient();
-
-
         }
 
         async Task GetFilesCheck(Dictionary<string, string> testFiles)
@@ -71,36 +71,63 @@ namespace Dropoff.Test
             await GetFilesCheck(getFiles);
         }
 
+        [Theory]
+        [InlineData("", "text/plain")]
+        [InlineData("?t=raw", "text/plain")]
+        [InlineData("?t=html", "text/html")]
+        [InlineData("?t=json", "application/json")]
+        public async Task GetContentTypes(string type, string expected)
+        {
+            string key = "11111111111111111111111111111111";
+            // Write the file
+            using (StreamWriter sw = new StreamWriter(key))
+            {
+                sw.WriteLine(@"{""Test"":""test""}");
+            }
+
+            // Assert the files can be fetched with the proper content types
+            var mediaType = new MediaTypeWithQualityHeaderValue(expected);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/" + key + type);
+            request.Headers.Accept.Add(mediaType);
+            var response = await _client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            Assert.Equal(expected, response.Content.Headers.ContentType.MediaType);
+        }
+
         [Fact]
         public async Task PostTest()
         {
+            List<string> toBePostedFiles = new List<string>()
+            {
+                @"{""Test"":""test""}",
+                @"<html><head></head><body><h1>Hello World!</h1></body></html>",
+                @"Test"
+            };
             Dictionary<string, string> postFiles = new Dictionary<string, string>();
             // Post the files via the Server API
-            foreach (var file in postFiles)
+            foreach (var file in toBePostedFiles)
             {
-                // Act
-                var response = await _client.PostAsync("/", new StringContent(file.Value));
+                // Post files
+                var response = await _client.PostAsync("/", new StringContent(file));
                 response.EnsureSuccessStatusCode();
-
+                // Store to be re-fetched
                 var responseString = await response.Content.ReadAsStringAsync();
-                postFiles.Add(responseString.Trim(), file.Value);
+                postFiles.Add(responseString.Trim(), file);
             }
 
             // Assert the files can be Fetched
             await GetFilesCheck(postFiles);
         }
 
-        [Fact]
-        public async Task InvalidKeyEntryTest()
+        [Theory]
+        [InlineData("/1111111111111111111111111111.txt")]
+        [InlineData("/111111111111111111111111111.")]
+        [InlineData("/11111111/../1111111111111111")]
+        [InlineData("../../../../../../../../../11")]
+        public async Task InvalidKeyEntryTest(string path)
         {
             // Act and Assert
-            var response = await _client.GetAsync("/1111111111111111111111111111.txt");
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-            response = await _client.GetAsync("/1111111111111111111111111111111.");
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-            response = await _client.GetAsync("/11111111111/../11111111111111111");
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-            response = await _client.GetAsync("/../../../../../../../../../../11");
+            var response = await _client.GetAsync(path);
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
     }
