@@ -14,6 +14,50 @@ namespace Dropoff.Server.Controllers
     public class DropoffController : Controller
     {
         private readonly string Storage;
+        private readonly string ItemTemplate = @"<a href=""/{0}"">{0}</a>    {1}    {2}";
+        private readonly string IndexTemplate = @"<!doctype html>
+<html lang=""en"">
+<head>
+    <meta charset=""utf-8"" />
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1, shrink-to-fit=no"" />
+    <title>Dropoff</title>
+    <style>
+    body {{
+        font-family: -apple-system,BlinkMacSystemFont,""Segoe UI"",Roboto,""Helvetica Neue"",Arial,sans-serif,""Apple Color Emoji"",""Segoe UI Emoji"",""Segoe UI Symbol"";
+        width: 100%;
+        padding-left: 15px;
+        padding-right: 15px;
+        margin-right: auto;
+        margin-left: auto;
+    }}
+    a:link, a:visited {{
+        color: slategray;
+        text-decoration-style: none;
+        text-decoration-color: slategray;
+        text-decoration-line: none;
+    }}
+    a:hover {{
+        color: black;
+    }}
+    footer {{
+        color: slategray;
+        text-align: center;
+    }}
+    </style>
+</head>
+<body>
+<h1>Dropoff</h1>
+<pre>
+<strong>File                                Size    Date</strong>
+{0}
+</pre>
+<footer>
+    <p>
+        <a href=""/about"" >About</a> | Another random experiment made by <a href=""https://devincarr.com"">this guy</a>.
+    </p>
+</footer>
+</body>
+</html>";
 
         public DropoffController(IConfiguration configuration)
         {
@@ -22,15 +66,15 @@ namespace Dropoff.Server.Controllers
 
         // POST /
         // Dropoff a new file and return the file name.
-        [HttpPost("{key?}")]
-        public async Task<IActionResult> Dropoff(string key)
+        [HttpPost("/")]
+        public async Task<IActionResult> Dropoff()
         {
             // Make sure the value is not empty
             if (Request.ContentLength <= 0)
             {
                 return BadRequest("Provided empty or invalid file.");
             }
-            // Make sure the file upload isn't too large
+            // Make sure the file upload isn""t too large
             if (Request.ContentLength > 4e8)
             {
                 return BadRequest("File too large.");
@@ -38,94 +82,43 @@ namespace Dropoff.Server.Controllers
             string id = Guid.NewGuid().ToString().Split('-').Aggregate("", (t, n) => t + n);
             string file = Path.Combine(Storage, id);
 
-            // If there is no key, just output to the file
-            if (string.IsNullOrEmpty(key))
+            using (var fileWriter = new FileStream(file, FileMode.CreateNew))
             {
-                using (var fileWriter = new FileStream(file, FileMode.CreateNew))
+                if (Request.HasFormContentType)
                 {
-                    if (Request.HasFormContentType)
+                    using (var stringWriter = new StreamWriter(fileWriter))
                     {
-                        using (var stringWriter = new StreamWriter(fileWriter))
+                        var payload = Request.Form["payload"];
+                        if (!string.IsNullOrEmpty(payload))
                         {
-                            var payload = Request.Form["payload"];
-                            if (!string.IsNullOrEmpty(payload))
-                            {
-                                await stringWriter.WriteAsync(payload);
-                            }
-                            else
-                            {
-                                return BadRequest("Provided empty or invalid file.");
-                            }
+                            await stringWriter.WriteAsync(payload);
+                        }
+                        else
+                        {
+                            return BadRequest("Provided empty or invalid file.");
                         }
                     }
-                    else
-                    {
-                        using (var binaryWriter = new BinaryWriter(fileWriter))
-                        {
-                            await Request.Body.CopyToAsync(binaryWriter.BaseStream);
-                        }
-                    }
-                    }
-                    return Ok(id);
                 }
-
-                string fileIV = file + ".iv";
-                byte[] keyBytes = Encoding.UTF8.GetBytes(key);
-                int keySize = keyBytes.Length * 8; // size in bits
-                using (var aes = new AesManaged())
+                else
                 {
-                    // Verify that the key is long enough
-                    var legal = aes.LegalKeySizes.First();
-                    if (!aes.ValidKeySize(keySize))
+                    using (var binaryWriter = new BinaryWriter(fileWriter))
                     {
-                        return BadRequest($"Invalid key length: {keySize}. key length bounds: [{legal.MinSize}, {legal.MaxSize}]");
+                        await Request.Body.CopyToAsync(binaryWriter.BaseStream);
                     }
-
-                    // Assign the key and generate an IV
-                    aes.Key = keyBytes;
-                    aes.GenerateIV();
-
-                    using (var ivWriter = new FileStream(fileIV, FileMode.CreateNew))
-                    using (var bin = new BinaryWriter(ivWriter))
-                    {
-                        // Write out the IV for the associated file.
-                        bin.Write(aes.IV);
-                    }
-
-                    // Create a decrytor to perform the stream transform.
-                    ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
-
-                    // Create the streams used for encryption.
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        using (CryptoStream csEncrypt = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
-                        {
-                            using (StreamWriter csWriter = new StreamWriter(csEncrypt))
-                            using (StreamReader bodyReader = new StreamReader(Request.Body))
-                            {
-                                await csWriter.WriteAsync(bodyReader.ReadToEnd());
-                            }
-                            using (var fileWriter = new FileStream(file, FileMode.CreateNew))
-                            using (var bin = new BinaryWriter(fileWriter))
-                            {
-                                bin.Write(ms.ToArray());
-                            }
-                        }
-                    }
-
                 }
                 return Ok(id);
             }
+        }
 
         // GET /
         // Redirect to 00000000000000000000000000000000 file (Readme).
-        [HttpGet("/")]
-        public IActionResult Get() => Get(Guid.Empty.ToString().Split('-').Aggregate("", (t, n) => t + n), null, "html");
+        [HttpGet("/about")]
+        public IActionResult About() => Get(Guid.Empty.ToString().Split('-').Aggregate("", (t, n) => t + n), "html");
 
         // GET /5
         // Fetch the file and return the contents.
-        [HttpGet("{id}/{key?}")]
-        public IActionResult Get(string id, string key, [FromQuery]string t)
+        [HttpGet("{id}")]
+        public IActionResult Get(string id, [FromQuery]string t)
         {
             // Verify the id exists and is the proper length
             if (string.IsNullOrEmpty(id) || id.Length != 32)
@@ -139,46 +132,11 @@ namespace Dropoff.Server.Controllers
             {
                 return NotFound("Key entry does not exist.");
             }
-            string fileIV = file + ".iv";
             string type = GetContentType(t);
             try
             {
-                // If the key is empty, return the file as normal (may or may not be encrypted)
-                if (string.IsNullOrEmpty(key))
-                {
-                    var fileStream = new FileStream(file, FileMode.Open, FileAccess.Read);
-                    return new FileStreamResult(fileStream, type);
-                }
-                using (var aes = new AesManaged())
-                {
-                    // Make sure the key length is a proper size
-                    byte[] keyBytes = Encoding.UTF8.GetBytes(key);
-                    if (!aes.ValidKeySize(keyBytes.Length))
-                    {
-                        return BadRequest("Invalid key length.");
-                    }
-                    aes.Key = keyBytes;
-                    using (var fileIVStream = new FileStream(fileIV, FileMode.Open, FileAccess.Read))
-                    using (var binReader = new BinaryReader(fileIVStream))
-                    {
-                        byte[] iv = binReader.ReadBytes(aes.BlockSize / 8);
-                        aes.IV = iv;
-                    }
-
-                    // Create a decrytor to perform the stream transform.
-                    ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-
-                    // Create the streams used for decryption.
-                    using (var fileStream = new FileStream(file, FileMode.Open, FileAccess.Read))
-                    {
-                        using (CryptoStream csDecrypt = new CryptoStream(fileStream, decryptor, CryptoStreamMode.Read))
-                        using (StreamReader srDecrypt = new StreamReader(csDecrypt))
-                        {
-                            return new FileContentResult(Encoding.UTF8.GetBytes(srDecrypt.ReadToEnd()), type);
-                        }
-                    }
-                }
-
+                var fileStream = new FileStream(file, FileMode.Open, FileAccess.Read);
+                return new FileStreamResult(fileStream, type);
             }
             catch (FileNotFoundException)
             {
@@ -190,7 +148,24 @@ namespace Dropoff.Server.Controllers
             }
         }
 
-        // Provide some shorthands for Content-Type's
+        // GET /
+        // Fetch the file and return the contents.
+        [HttpGet("/")]
+        public IActionResult GetAll()
+        {
+            var files = Directory.EnumerateFiles(Storage)
+                .Select(file => new FileInfo(file))
+                .Select(file => string.Format(ItemTemplate, 
+                    file.Name, 
+                    file.Length > 1000 ? (file.Length / 1000) + " KB" : file.Length + " B",
+                    file.LastWriteTime.ToLongDateString()
+                ));
+            var filesContent = string.Join('\n', files);
+            var content = string.Format(IndexTemplate, string.Join('\n', files));
+            return new FileContentResult(Encoding.UTF8.GetBytes(content), "text/html");
+        }
+
+        // Provide some shorthands for Content-Type""s
         private string GetContentType(string type)
         {
             switch (type)
