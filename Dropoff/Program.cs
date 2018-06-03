@@ -3,6 +3,7 @@ using System.Configuration;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 
@@ -12,7 +13,11 @@ namespace Dropoff
     {
         static async Task Main(string[] args)
         {
-            DropoffParams dropoffParams = ParseDropoff(args);
+            DropoffParams dropoffParams;
+            if (!ParseDropoff(args, out dropoffParams)) {
+                OutputHelp();
+                return;
+            }
             if (dropoffParams.Help)
             {
                 OutputHelp();
@@ -39,9 +44,9 @@ namespace Dropoff
             Console.WriteLine(await response.Content.ReadAsStringAsync());
         }
 
-        private static DropoffParams ParseDropoff(string[] args)
+        private static bool ParseDropoff(string[] args, out DropoffParams dropoffParams)
         {
-            DropoffParams dropoffParams = new DropoffParams();
+            dropoffParams = new DropoffParams();
             // Set server
             dropoffParams.Server = ConfigurationManager.AppSettings["DropoffServer"];
             // Parse all the args
@@ -50,7 +55,7 @@ namespace Dropoff
                 if (args[i] == "-h" || args[i] == "--help")
                 {
                     dropoffParams.Help = true;
-                    return dropoffParams;
+                    return true;
                 }
                 // Make sure the args have an associated param
                 if (i + 1 < args.Length)
@@ -85,10 +90,18 @@ namespace Dropoff
                                 i += 1;
                                 break;
                             }
+                        default:
+                            {
+                                Console.WriteLine($"Error: Unknown parameter provided: {args[i]}");
+                                return false;
+                            }
                     }
+                } else if (args[i].Length != 32) {
+                    Console.WriteLine($"Error: Unknown parameter provided: {args[i]}");
+                    return false;
                 }
             }
-            return dropoffParams;
+            return true;
         }
 
         private static void OutputHelp()
@@ -96,10 +109,11 @@ namespace Dropoff
             Console.WriteLine(@"
 Dropoff Client v{0}
 
-  -s, --server <server>    Dropoff server to communicate with (if different than one provided in app.config).
+  -s, --server <server>    Dropoff server to communicate with (if 
+                           different than one provided in app.config).
   -r, --retrieve <id>      Id of a file to retrieve from the Dropoff store.
   -h, --help               Display this help.
-            ", 0.1);
+            ", typeof(Dropoff.Program).Assembly.GetName().Version.ToString());
         }
 
         private struct DropoffParams
