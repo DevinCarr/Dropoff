@@ -15,7 +15,7 @@ namespace Dropoff
         private string hostAddr { get; set; }
         private HttpClient client { get; set; }
         private AuthenticationResult token { get; set; }
-        private bool authorized = false;
+        private bool authorized = true;
 
         public Client(string addr)
         {
