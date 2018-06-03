@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Dropoff.Server.Controllers
 {
@@ -112,6 +111,7 @@ namespace Dropoff.Server.Controllers
 
         // GET /
         // Redirect to 00000000000000000000000000000000 file (Readme).
+        [AllowAnonymous]
         [HttpGet("/about")]
         public IActionResult About() => Get(Guid.Empty.ToString().Split('-').Aggregate("", (t, n) => t + n), "html");
 

@@ -10,11 +10,12 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Dropoff.Server/bin/Debug/netcoreapp2.0/Dropoff.Server.dll",
+            "program": "${workspaceFolder}/Dropoff.Server/bin/Debug/netcoreapp2.1/Dropoff.Server.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Dropoff.Server",
             "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "DROPOFF_STORE": "D:\\DropoffStore"
             },
             // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
             "console": "internalConsole",
@@ -22,10 +23,18 @@
             "internalConsoleOptions": "openOnSessionStart"
         },
         {
-            "name": ".NET Core Attach",
+            "name": "Dropoff Client (dev)",
             "type": "coreclr",
-            "request": "attach",
-            "processId": "${command:pickProcess}"
+            "request": "launch",
+            "preLaunchTask": "build",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/Dropoff/bin/Debug/netcoreapp2.1/Dropoff.dll",
+            "args": ["-s", "https://localhost:52053/", "-r", "00000000000000000000000000000000"],
+            "cwd": "${workspaceFolder}/Dropoff",
+            // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "internalConsoleOptions": "openOnSessionStart"
         }
     ,]
 }

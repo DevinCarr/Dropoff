@@ -28,12 +28,12 @@ namespace Dropoff
                 }
                 else if (!string.IsNullOrEmpty(dropoffParams.Input))
                 {
-                    response = await client.Dropoff(dropoffParams.Input, dropoffParams.Key);
+                    response = await client.Dropoff(dropoffParams.Input);
                 }
             }
             else
             {
-                response = await client.Fetch(dropoffParams.Id, dropoffParams.Key);
+                response = await client.Fetch(dropoffParams.Id);
             }
             Console.WriteLine(await response.Content.ReadAsStringAsync());
         }
@@ -68,13 +68,6 @@ namespace Dropoff
                                 i += 1;
                                 break;
                             }
-                        case "-k":
-                        case "--key":
-                            {
-                                dropoffParams.Key = args[i + 1];
-                                i += 1;
-                                break;
-                            }
                         case "-f":
                         case "--file":
                             {
@@ -102,7 +95,6 @@ Dropoff Client v{0}
 
   -s, --server <server>    Dropoff server to communicate with.
   -r, --retrieve <id>      Id of a file to retrieve from the Dropoff store.
-  -k, --key <key>          Key that encrypted a file in the Dropoff store.
   -h, --help               Display this help.
             ", 0.1);
         }
@@ -112,7 +104,6 @@ Dropoff Client v{0}
             public bool Help { get; set; }
             public string Server { get; set; }
             public string Id { get; set; }
-            public string Key { get; set; }
             public string FilePath { get; set; }
             public string Input { get; set; }
             public bool Dropoff { get { return Id == null && (FilePath != null || Input != null); }}
