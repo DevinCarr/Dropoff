@@ -26,22 +26,23 @@ namespace Dropoff.Server
             services.AddRouting(options => options.LowercaseUrls = true);
             if (!Configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT").Equals("Development"))
              {
-                services.AddAuthentication(sharedOptions =>
-                {
-                    sharedOptions.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                }).AddAzureAdBearer(options => Configuration.Bind("AzureAd", options));
-                services.AddMvc(config =>
-                {
-                    var policy = new AuthorizationPolicyBuilder()
-                                     .RequireAuthenticatedUser()
-                                     .Build();
-                    config.Filters.Add(new AuthorizeFilter(policy));
-                }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+                //services.AddAuthentication(sharedOptions =>
+                //{
+                //    sharedOptions.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                //}).AddAzureAdBearer(options => Configuration.Bind("AzureAd", options));
+                //services.AddMvc(config =>
+                //{
+                //    var policy = new AuthorizationPolicyBuilder()
+                //                     .RequireAuthenticatedUser()
+                //                     .Build();
+                //    config.Filters.Add(new AuthorizeFilter(policy));
+                //}).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             }
             else
             {
                 services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             }
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,11 +52,8 @@ namespace Dropoff.Server
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseAuthentication();
-            }
 
+            app.UseAuthentication();
             app.UseStaticFiles();
 
             // Make sure the Dropoff directory exists
