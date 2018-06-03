@@ -25,7 +25,7 @@ namespace Dropoff.Server
         {
             services.AddRouting(options => options.LowercaseUrls = true);
             if (!Configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT").Equals("Development"))
-            {
+             {
                 services.AddAuthentication(sharedOptions =>
                 {
                     sharedOptions.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -54,7 +54,6 @@ namespace Dropoff.Server
             else
             {
                 app.UseAuthentication();
-
             }
 
             app.UseStaticFiles();
