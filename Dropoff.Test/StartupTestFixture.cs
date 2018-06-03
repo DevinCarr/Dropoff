@@ -27,43 +27,19 @@ namespace Dropoff.Test
 
         public StartupTestFixture()
         {
-            using (var file = File.OpenText("Properties\\launchSettings.json"))
+            // Assign the Environment Variables
+            DropoffStorePath = Directory.GetCurrentDirectory();
+            Config = new ConfigurationBuilder();
+            Config.AddInMemoryCollection(new Dictionary<string, string>()
             {
-                try
-                {
-                    var reader = new JsonTextReader(file);
-                    var jObject = JObject.Load(reader);
+                { "DROPOFF_STORE", DropoffStorePath },
+                { "ASPNETCORE_ENVIRONMENT", "Development" }
+            });
 
-                    var variables = jObject
-                        .GetValue("profiles")
-                        //select a proper profile here
-                        .SelectMany(profiles => profiles.Children())
-                        .SelectMany(profile => profile.Children<JProperty>())
-                        .Where(prop => prop.Name == "environmentVariables")
-                        .SelectMany(prop => prop.Value.Children<JProperty>())
-                        .ToList();
-
-                    foreach (var variable in variables)
-                    {
-                        Environment.SetEnvironmentVariable(variable.Name, variable.Value.ToString());
-                    }
-                }
-                catch { }
-
-                // Assign the Environment Variables
-                DropoffStorePath = Directory.GetCurrentDirectory();
-                Config = new ConfigurationBuilder();
-                Config.AddInMemoryCollection(new Dictionary<string, string>()
-                {
-                    { "DROPOFF_STORE", DropoffStorePath },
-                    { "ASPNETCORE_ENVIRONMENT", "Development" }
-                });
-
-                // Setup Server
-                Server = new TestServer(new WebHostBuilder()
-                            .UseStartup<Server.Startup>()
-                            .UseConfiguration(Config.Build()));
-            }
+            // Setup Server
+            Server = new TestServer(new WebHostBuilder()
+                        .UseStartup<Server.Startup>()
+                        .UseConfiguration(Config.Build()));
         }
 
         #region IDisposable Support
