@@ -109,11 +109,15 @@ namespace Dropoff.Server.Controllers
             }
         }
 
-        // GET /
+        // GET /about
         // Redirect to 00000000000000000000000000000000 file (Readme).
-        [AllowAnonymous]
         [HttpGet("/about")]
         public IActionResult About() => Get(Guid.Empty.ToString().Split('-').Aggregate("", (t, n) => t + n), "html");
+
+        // POST /about
+        // Redirect to 00000000000000000000000000000000 file (Readme).
+        [HttpPost("/about")]
+        public async Task<IActionResult> AboutPost() => await Dropoff();
 
         // GET /5
         // Fetch the file and return the contents.
