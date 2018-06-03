@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -41,6 +42,8 @@ namespace Dropoff
         private static DropoffParams ParseDropoff(string[] args)
         {
             DropoffParams dropoffParams = new DropoffParams();
+            // Set server
+            dropoffParams.Server = ConfigurationManager.AppSettings["DropoffServer"];
             // Parse all the args
             for (int i = 0; i < args.Length; i++)
             {
@@ -93,7 +96,7 @@ namespace Dropoff
             Console.WriteLine(@"
 Dropoff Client v{0}
 
-  -s, --server <server>    Dropoff server to communicate with.
+  -s, --server <server>    Dropoff server to communicate with (if different than one provided in app.config).
   -r, --retrieve <id>      Id of a file to retrieve from the Dropoff store.
   -h, --help               Display this help.
             ", 0.1);

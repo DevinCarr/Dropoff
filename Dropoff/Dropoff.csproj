@@ -1,9 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <RootNamespace>Dropoff.Client</RootNamespace>
+    <Authors>Devin Carr</Authors>
+    <Description>Command line client to connect to a Dropoff instance.</Description>
+    <NeutralLanguage></NeutralLanguage>
+    <PackageLicenseUrl>https://github.com/DevinCarr/Dropoff/blob/master/LICENSE</PackageLicenseUrl>
+    <Copyright>Copyright © Devin Carr 2018</Copyright>
+    <PackageProjectUrl>https://github.com/DevinCarr/Dropoff</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/DevinCarr/Dropoff</RepositoryUrl>
+    <PackageTags>commandline dropoff utility</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -14,7 +22,6 @@
     <AllowUnsafeBlocks></AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Identity.Client" Version="1.1.4-preview0002" />
     <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="3.19.6" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
   </ItemGroup>
