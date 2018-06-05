@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
 using System;
 using System.IO;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace Dropoff.Server.Controllers
     {
         private readonly string Storage;
         private readonly string ItemTemplate = @"<a href=""/{0}"">{0}</a>    {1}    {2}";
-        private readonly string IndexTemplate = @"<!doctype html>
+        private readonly string ReturnTemplate = @"<!doctype html>
 <html lang=""en"">
 <head>
     <meta charset=""utf-8"" />
@@ -45,11 +46,7 @@ namespace Dropoff.Server.Controllers
     </style>
 </head>
 <body>
-<h1>Dropoff</h1>
-<pre>
-<strong>File                                Size    Date</strong>
 {0}
-</pre>
 <footer>
     <p>
         <a href=""/about"" >About</a> | Another random experiment made by <a href=""https://devincarr.com"">this guy</a>.
@@ -57,6 +54,13 @@ namespace Dropoff.Server.Controllers
 </footer>
 </body>
 </html>";
+        private readonly string IndexTemplate = @"<h1>Dropoff</h1>
+<pre>
+<strong>File                                Size    Date</strong>
+{0}
+</pre>";
+        private readonly string NewTemplate = @"<h1>Dropoff</h1>
+<p><a href=""/{0}"" target=""_blank"">{0}</a></p>";
 
         public DropoffController(IConfiguration configuration)
         {
@@ -66,7 +70,7 @@ namespace Dropoff.Server.Controllers
         // POST /
         // Dropoff a new file and return the file name.
         [HttpPost("/")]
-        public async Task<IActionResult> Dropoff()
+        public async Task<IActionResult> Dropoff(bool html = false)
         {
             // Make sure the value is not empty
             if (Request.ContentLength <= 0)
@@ -105,7 +109,17 @@ namespace Dropoff.Server.Controllers
                         await Request.Body.CopyToAsync(binaryWriter.BaseStream);
                     }
                 }
-                return Ok(id);
+
+                if (html)
+                {
+                    var content = string.Format(NewTemplate, id);
+                    var page = string.Format(ReturnTemplate, content);
+                    return new FileContentResult(Encoding.UTF8.GetBytes(page), "text/html");
+                }
+                else
+                {
+                    return Ok(id);
+                }
             }
         }
 
@@ -117,7 +131,7 @@ namespace Dropoff.Server.Controllers
         // POST /about
         // Redirect to 00000000000000000000000000000000 file (Readme).
         [HttpPost("/about")]
-        public async Task<IActionResult> AboutPost() => await Dropoff();
+        public async Task<IActionResult> AboutPost() => await Dropoff(true);
 
         // GET /5
         // Fetch the file and return the contents.
@@ -166,7 +180,8 @@ namespace Dropoff.Server.Controllers
                 ));
             var filesContent = string.Join('\n', files);
             var content = string.Format(IndexTemplate, string.Join('\n', files));
-            return new FileContentResult(Encoding.UTF8.GetBytes(content), "text/html");
+            var page = string.Format(ReturnTemplate, content);
+            return new FileContentResult(Encoding.UTF8.GetBytes(page), "text/html");
         }
 
         // Provide some shorthands for Content-Type""s

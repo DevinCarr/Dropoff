@@ -111,5 +111,17 @@ namespace Dropoff.Test
             var response = await Client.Fetch(path);
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
+
+        [Fact]
+        public async Task DropoffContentTypeAsync()
+        {
+            string fileContents = @"{""Test"":""test""}";
+            // Dropoff file
+            var response = await Client.Dropoff(fileContents);
+            response.EnsureSuccessStatusCode();
+
+            // Assert
+            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType);
+        }
     }
 }

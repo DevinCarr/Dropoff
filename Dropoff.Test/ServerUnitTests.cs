@@ -113,5 +113,22 @@ namespace Dropoff.Test
             var response = await Client.GetAsync(path);
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
+
+        [Theory]
+        [InlineData("text/html", "text/html")]
+        [InlineData("application/json", "text/html")]
+        public async Task DropoffContentTypeAsync(string requestType, string expectedType)
+        {
+            using (var client = Server.CreateClient()) {
+                string fileContents = @"{""Test"":""test""}";
+                // Dropoff file
+                var add = client.DefaultRequestHeaders.Accept.TryParseAdd(requestType);
+                var response = await client.PostAsync("/about", new StringContent(fileContents));
+                response.EnsureSuccessStatusCode();
+
+                // Assert
+                Assert.Equal(expectedType, response.Content.Headers.ContentType.MediaType);
+            }
+        }
     }
 }
